@@ -1,4 +1,6 @@
 class UsersController < ApplicationController
+  skip_before_action :authenticate_request, only: [:create]
+  before_action :set_user, only: [:show, :destroy]
 
   def index
     if params[:role].present?
@@ -10,30 +12,35 @@ class UsersController < ApplicationController
   end
 
   def show
-    @user = User.find(params[:id])
-    render json: { success: true, user: @user }
+    render json: @user, status: :ok
   end
 
   def create
-    @user = User.create(user_params)
-    render json: { success: true, user: @user}
+    @user = User.new(user_params)
+    if @user.save
+      render json: @user, status: :created
+    else
+      render json: { errors: @user.errors.full_messages }, status: :unprocessable_entity
+    end
   end
 
   def update
-    @user = User.find(params[:id])
-    @user.update(user_params)
-    render json: { success: true, user: @user }
+    unless @user.update(user_params)
+      render json: { errors: @user.errors.full_messages }, status: :unprocessable_entity
+    end
   end
 
   def destroy
-    @user = User.find(params[:id])
-    @user.destroy if @user.present?
-    render json: { success: true, message: "Data deleted Successfully"}
+    @user.destroy
   end
 
   private
 
   def user_params
-    params.require(:user).permit(:first_name, :last_name, :email, :gender, :mob_no, :role, :address, :price, :rating)
+    params.require(:user).permit(:first_name, :last_name, :email, :password, :password_confirmation, :gender, :mob_no, :role, :address, :price, :rating)
+  end
+
+  def set_user
+    @user = User.find(params[:id])
   end
 end

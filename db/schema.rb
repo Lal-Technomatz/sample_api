@@ -15,6 +15,7 @@ ActiveRecord::Schema[7.0].define(version: 2022_08_17_080505) do
     t.string "first_name"
     t.string "last_name"
     t.string "email"
+    t.string "password_digest"
     t.string "gender"
     t.string "mob_no"
     t.string "role"
